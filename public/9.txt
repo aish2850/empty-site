@@ -1,0 +1,34 @@
+pip install scikit-learn
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Academic document collection
+documents = [
+    "Machine learning is a branch of artificial intelligence.",
+    "Deep learning uses neural networks for learning.",
+    "Data science uses statistics and machine learning.",
+    "Computer networks connect computers and exchange data.",
+    "Artificial intelligence helps in solving complex problems."
+]
+
+# Convert documents into TF-IDF vectors
+vectorizer = TfidfVectorizer()
+tfidf = vectorizer.fit_transform(documents)
+
+# Accept search query
+query = input("Enter search query: ")
+
+# Convert query into TF-IDF vector
+q = vectorizer.transform([query])
+
+# Calculate cosine similarity
+scores = cosine_similarity(q, tfidf)[0]
+
+# Rank documents by relevance
+ranked = scores.argsort()[::-1]
+
+print("\nSearch Results:")
+for i in ranked:
+    if scores[i] > 0:
+        print("Document:", documents[i])
+        print("Similarity:", round(scores[i], 3))
