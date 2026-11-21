@@ -1,0 +1,51 @@
+
+import nltk
+import string
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk import pos_tag, ne_chunk
+
+# Download required datasets
+for x in ['punkt', 'punkt_tab', 'stopwords', 'averaged_perceptron_tagger_eng', 'wordnet', 'maxent_ne_chunker_tab', 'words']:
+    nltk.download(x)
+
+# Social media posts
+text = """Virat Kohli visited Bengaluru yesterday.
+Google launched a new product.
+Customers are loving the products and services.
+Companies are improving their technologies."""
+
+# a) Sentence and word tokenization
+sentences = sent_tokenize(text)
+words = word_tokenize(text)
+print("Sentences:", sentences)
+print("Words:", words)
+
+# b) Standard and custom stopword removal
+stop = set(stopwords.words('english')) | {'product', 'products', 'services', 'company', 'companies'}
+
+# c) Remove stopwords and punctuation
+clean = [w for w in words if w.lower() not in stop and w not in string.punctuation]
+
+print("\nCleaned Words:", clean)
+
+# d) POS tagging
+tags = pos_tag(clean)
+print("\nPOS Tags:", tags)
+
+# e) Stemming and lemmatization
+stem = PorterStemmer()
+lemma = WordNetLemmatizer()
+
+print("\nStemming and Lemmatization:")
+for w in clean:
+    print(w, "->", stem.stem(w), "/", lemma.lemmatize(w))
+
+# f) Named Entity Recognition
+print("\nNamed Entities:")
+for sent in sentences:
+    tree = ne_chunk(pos_tag(word_tokenize(sent)))
+    for chunk in tree:
+        if hasattr(chunk, 'label'):
+            print(chunk.label(), ":", " ".join(c[0] for c in chunk))
