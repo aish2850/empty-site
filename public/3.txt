@@ -1,0 +1,51 @@
+
+from collections import deque
+
+# NFA specification
+states = input("Enter states: ").split()
+alphabet = input("Enter alphabet: ").split()
+start = input("Enter start state: ")
+final = input("Enter final states: ").split()
+
+n = int(input("Enter number of transitions: "))
+trans = {}
+
+print("Enter transitions (state symbol next_state):")
+for i in range(n):
+    a, b, c = input().split()
+    trans.setdefault((a, b), []).append(c)
+
+s = input("Enter product code: ")
+
+# DFS
+def dfs(state, pos):
+    if pos == len(s):
+        return state in final
+
+    for next_state in trans.get((state, s[pos]), []):
+        if dfs(next_state, pos + 1):
+            return True
+    return False
+
+# BFS
+def bfs():
+    q = deque([(start, 0)])
+
+    while q:
+        state, pos = q.popleft()
+
+        if pos == len(s) and state in final:
+            return True
+
+        if pos < len(s):
+            for next_state in trans.get((state, s[pos]), []):
+                q.append((next_state, pos + 1))
+
+    return False
+
+d = dfs(start, 0)
+b = bfs()
+
+print("DFS:", "Accepted" if d else "Rejected")
+print("BFS:", "Accepted" if b else "Rejected")
+print("Comparison:", "Both give same result" if d == b else "Results differ")
