@@ -1,0 +1,35 @@
+
+import nltk
+from nltk import CFG
+from nltk.parse import RecursiveDescentParser, ChartParser
+
+# Define CFG
+grammar = CFG.fromstring("""
+S -> NP VP
+NP -> Det N | Det N PP
+VP -> V NP | V
+PP -> P NP
+Det -> 'the' | 'a'
+N -> 'boy' | 'girl' | 'apple' | 'park'
+V -> 'eats' | 'sees' | 'runs'
+P -> 'in' | 'on'
+""")
+
+# Input sentence
+sentence = input("Enter sentence: ").lower().split()
+
+# Recursive Descent Parser
+print("\nRecursive Descent Parser:")
+p1 = RecursiveDescentParser(grammar)
+for tree in p1.parse(sentence):
+    print(tree)
+    tree.pretty_print()
+    tree.draw()
+
+# Chart Parser
+print("\nChart Parser:")
+p2 = ChartParser(grammar)
+for tree in p2.parse(sentence):
+    print(tree)
+    tree.pretty_print()
+    tree.draw()
