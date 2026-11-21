@@ -1,0 +1,38 @@
+
+from nltk.util import ngrams
+from collections import Counter
+import re
+
+# Input text corpus
+text = input("Enter text corpus: ").lower()
+words = re.findall(r'\b\w+\b', text)
+
+# Generate N-gram models
+unigram = Counter(ngrams(words, 1))
+bigram = Counter(ngrams(words, 2))
+trigram = Counter(ngrams(words, 3))
+
+print("\nUnigram:", unigram)
+print("Bigram:", bigram)
+print("Trigram:", trigram)
+
+# Predict next word
+context = input("\nEnter sequence: ").lower().split()
+
+# Unigram prediction
+u = unigram.most_common(1)
+
+
+print("Unigram Prediction:", u[0][0][0] if u else "No prediction")
+
+# Bigram prediction
+b = [(gram[1], count) for gram, count in bigram.items()
+     if gram[0] == context[-1]]
+b.sort(key=lambda x: x[1], reverse=True)
+print("Bigram Prediction:", b[0][0] if b else "No prediction")
+
+# Trigram prediction
+t = [(gram[2], count) for gram, count in trigram.items()
+     if len(context) >= 2 and gram[:2] == tuple(context[-2:])]
+t.sort(key=lambda x: x[1], reverse=True)
+print("Trigram Prediction:", t[0][0] if t else "No prediction")
