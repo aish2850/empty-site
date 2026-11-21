@@ -1,0 +1,85 @@
+pip install pymupdf spacy nltk textblob matplotlib
+python -m spacy download en_core_web_sm
+
+import fitz
+import re
+import spacy
+import nltk
+import matplotlib.pyplot as plt
+from collections import Counter
+from textblob import TextBlob
+from nltk.corpus import wordnet
+
+# Download WordNet
+nltk.download('wordnet')
+
+# Load spaCy model
+nlp = spacy.load("en_core_web_sm")
+
+# Read PDF
+file = input("Enter PDF file path: ")
+pdf = fitz.open(file)
+text = ""
+
+for page in pdf:
+    text += page.get_text()
+
+# a) Word frequency and visualization
+words = re.findall(r'\b[a-zA-Z]+\b', text.lower())
+freq = Counter(words)
+
+print("\nWord Frequency:", freq.most_common(10))
+
+top = freq.most_common(10)
+plt.bar([w[0] for w in top], [w[1] for w in top])
+plt.title("Most Frequent Words")
+plt.xlabel("Words")
+plt.ylabel("Frequency")
+plt.show()
+
+# b) Extract candidate name, email and phone
+doc = nlp(text)
+
+names = [e.text for e in doc.ents if e.label_ == "PERSON"]
+emails = re.findall(r'[\w.-]+@[\w.-]+\.\w+', text)
+phones = re.findall(r'\+?\d[\d\s()-]{8,}\d', text)
+
+print("\nCandidate Names:", list(set(names)))
+print("Emails:", list(set(emails)))
+print("Phone Numbers:", list(set(phones)))
+
+# c) Extract entities and relationships
+print("\nEntities:")
+for e in doc.ents:
+    print(e.text, "-", e.label_)
+
+print("\nRelationships:")
+for sent in doc.sents:
+    for token in sent:
+        if token.dep_ in ("nsubj", "nsubjpass"):
+            obj = [c.text for c in token.head.children
+                   if c.dep_ in ("dobj", "attr", "pobj")]
+            if obj:
+                print(token.text, "->", token.head.text, "->", obj)
+
+# d) Sentiment analysis
+score = TextBlob(text).sentiment.polarity
+print("\nSentiment:", "Positive" if score > 0 else "Negative" if score < 0 else "Neutral")
+
+# e) Find synonyms
+key = input("\nEnter keyword for synonyms: ")
+synonyms = set()
+
+for syn in wordnet.synsets(key):
+    for word in syn.lemmas():
+        synonyms.add(word.name())
+
+print("Synonyms:", synonyms)
+
+# f) Gender classification using explicitly stated information
+gender = re.search(
+    r'(?im)^\s*gender\s*:\s*(male|female|non-binary|other)\s*$',
+    text
+)
+
+print("\nGender:", gender.group(1) if gender else "Not specified")
