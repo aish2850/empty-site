@@ -1,0 +1,31 @@
+
+# Read DFA specification
+states = input("Enter states: ").split()
+alphabet = input("Enter alphabet: ").split()
+start = input("Enter start state: ")
+final = input("Enter final states: ").split()
+
+n = int(input("Enter number of transitions: "))
+trans = {}
+
+print("Enter transitions (state symbol next_state):")
+for i in range(n):
+    a, b, c = input().split()
+    trans[(a, b)] = c
+
+# Read employee ID
+s = input("Enter Employee ID: ")
+
+state = start
+
+# DFA string validation
+for ch in s:
+    if ch not in alphabet or (state, ch) not in trans:
+        state = None
+        break
+    state = trans[(state, ch)]
+
+if state in final:
+    print("Accepted: Valid Employee ID")
+else:
+    print("Rejected: Invalid Employee ID")
