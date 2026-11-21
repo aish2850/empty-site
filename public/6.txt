@@ -1,0 +1,34 @@
+pip install beautifulsoup4 pyspellchecker
+
+from bs4 import BeautifulSoup
+from spellchecker import SpellChecker
+import re
+
+# Read raw input file
+with open("raw.txt", "r", encoding="utf-8") as f:
+    text = f.read()
+
+# Remove HTML tags
+text = BeautifulSoup(text, "html.parser").get_text()
+
+# Remove URLs
+text = re.sub(r'https?://\S+|www\.\S+', '', text)
+
+# Remove duplicate sentences
+sentences = text.split('.')
+text = '. '.join(dict.fromkeys(s.strip() for s in sentences if s.strip()))
+
+# Correct spelling errors
+spell = SpellChecker()
+words = text.split()
+text = ' '.join(spell.correction(w) or w for w in words)
+
+# Remove extra spaces
+text = re.sub(r'\s+', ' ', text).strip()
+
+# Save cleaned content
+with open("cleaned.txt", "w", encoding="utf-8") as f:
+    f.write(text)
+
+print("Raw text:", text)
+print("Cleaned content saved to cleaned.txt")
