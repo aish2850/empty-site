@@ -1,0 +1,54 @@
+pip install scikit-learn
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+news = [
+    "India won the cricket match", "The team scored a great victory",
+    "Football players won the tournament", "The cricket team played well",
+    "Government announced new policies", "Election results were declared",
+    "Political leaders attended the meeting", "The minister addressed parliament",
+    "Stock market prices increased", "Company reported high profits",
+    "Business investment and economy are growing", "Banks announced new loans",
+    "New artificial intelligence technology launched", "Software developers created an application",
+    "Computer technology is improving", "New smartphone technology released",
+    "The actor won an award", "New movie released in theatres",
+    "Music concert attracted many fans", "The film received positive reviews"
+]
+
+categories = [
+    "Sports", "Sports", "Sports", "Sports",
+    "Politics", "Politics", "Politics", "Politics",
+    "Business", "Business", "Business", "Business",
+    "Technology", "Technology", "Technology", "Technology",
+    "Entertainment", "Entertainment", "Entertainment", "Entertainment"
+]
+
+# Split dataset
+x_train, x_test, y_train, y_test = train_test_split(
+    news, categories, test_size=0.25, random_state=42, stratify=categories
+)
+
+# TF-IDF feature extraction
+vectorizer = TfidfVectorizer()
+x_train = vectorizer.fit_transform(x_train)
+x_test = vectorizer.transform(x_test)
+
+# Train Naive Bayes classifier
+model = MultinomialNB()
+model.fit(x_train, y_train)
+
+# Predict categories
+y_pred = model.predict(x_test)
+
+# Evaluate performance
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Precision:", precision_score(y_test, y_pred, average="macro", zero_division=0))
+print("Recall:", recall_score(y_test, y_pred, average="macro", zero_division=0))
+print("F1-Score:", f1_score(y_test, y_pred, average="macro", zero_division=0))
+
+# Classify a new news article
+article = input("\nEnter a news article: ")
+article = vectorizer.transform([article])
+print("Predicted Category:", model.predict(article)[0])
