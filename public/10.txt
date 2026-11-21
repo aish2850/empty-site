@@ -1,0 +1,40 @@
+pip install nltk transformers torch
+
+import nltk
+from nltk.tokenize import sent_tokenize
+from nltk.corpus import stopwords
+from collections import Counter
+from transformers import pipeline
+
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('stopwords')
+
+# Input news article
+text = input("Enter news article: ")
+
+# a) Extractive summarization
+sentences = sent_tokenize(text)
+words = nltk.word_tokenize(text.lower())
+
+stop = set(stopwords.words('english'))
+freq = Counter(w for w in words if w.isalpha() and w not in stop)
+
+scores = {}
+for s in sentences:
+    scores[s] = sum(freq[w.lower()] for w in nltk.word_tokenize(s)
+                    if w.lower() in freq)
+
+extractive = sorted(sentences, key=lambda s: scores[s], reverse=True)[:2]
+
+# b) Abstractive summarization
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+abstractive = summarizer(text, max_length=80, min_length=20,
+                         do_sample=False)[0]['summary_text']
+
+# c) Compare summaries
+print("\nExtractive Summary:")
+print(" ".join(extractive))
+
+print("\nAbstractive Summary:")
+print(abstractive)
